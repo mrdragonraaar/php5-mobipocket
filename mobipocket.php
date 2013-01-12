@@ -131,6 +131,14 @@ class mobipocket
 	}
 
 	/**
+	 * Mapping to exth_header->publishing_date_str().
+	 */
+	public function publishing_date_str($format = 'F d Y')
+	{
+		return $this->exth_header->publishing_date_str($format);
+	}
+
+	/**
 	 * Get title.
 	 * Returns full name if updated title does not exist.
 	 * @return title.

@@ -346,6 +346,32 @@ class exth_header extends base_header
 	}
 
 	/**
+         * Get the publishing date from EXTH records as UTC.
+	 * @return publishing date as UTC.
+         */
+	public function publishing_date_utc()
+	{
+		$publish_date = $this->publishing_date();
+
+		return $publish_date ? strtotime($publish_date) : -1;
+	}
+
+	/**
+         * Get the publishing date from EXTH records as formatted string.
+	 * @param $format date format.
+	 * @return publishing date as formatted string.
+         */
+	public function publishing_date_str($format = 'F d Y')
+	{
+		$publish_date_utc = $this->publishing_date_utc();
+
+		if ($publish_date_utc > -1)
+			return date($format, $publish_date_utc);
+
+		return "";
+	}
+
+	/**
 	 * Get review from EXTH records.
 	 * @return review.
 	 */
