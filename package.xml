@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+	<name>mobipocket</name>
+	<channel>pear.php.net</channel>
+	<summary>PHP5 library to read MOBIPocket files.</summary>
+	<description>PHP5 library to read MOBIPocket files.</description>
+	<lead>
+		<name>Adrian D. Elgar</name>
+		<user>ade</user>
+		<email>ade@mrdragonraaar.com</email>
+		<active>yes</active>
+	</lead>
+	<date>2013-01-12</date>
+	<time>09:47:00</time>
+	<version>
+		<release>0.0.1</release>
+		<api>0.0.1</api>
+	</version>
+	<stability>
+		<release>stable</release>
+		<api>stable</api>
+	</stability>
+	<license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+	<notes>
+	- initial release
+	</notes>
+	<contents>
+		<dir name="/">
+			<file baseinstalldir="mobipocket" name="mobipocket.php" role="php" />
+			<file baseinstalldir="mobipocket" name="pdb.php" role="php" />
+			<file baseinstalldir="mobipocket" name="palmdoc_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="base_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="mobi_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="exth_header.php" role="php" />
+		</dir>
+	</contents>
+	<dependencies>
+		<required>
+			<php>
+				<min>5.3.10</min>
+			</php>
+			<pearinstaller>
+				<min>1.9.4</min>
+			</pearinstaller>
+		</required>
+	</dependencies>
+	<phprelease />
+</package>
+
+
