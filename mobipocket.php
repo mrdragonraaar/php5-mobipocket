@@ -4,18 +4,15 @@
  * 
  * (c)2013 mrdragonraaar.com
  */
-include_once('pdb.php');
-include_once('palmdoc_header.php');
+include_once('palmdoc.php');
 include_once('mobi_header.php');
 include_once('exth_header.php');
 
 /**
  * MOBIPocket.
  */
-class mobipocket
+class mobipocket extends palmdoc
 {
-	public $pdb;
-	public $palmdoc_header;
 	public $mobi_header;
 	public $exth_header;
 	public $full_name;
@@ -33,8 +30,7 @@ class mobipocket
          */
 	protected function _init()
 	{
-		$this->pdb = new pdb();
-		$this->palmdoc_header = new palmdoc_header();
+		parent::_init();
 		$this->mobi_header = new mobi_header();
 		$this->exth_header = new exth_header();
 		$this->full_name = "";
@@ -49,21 +45,16 @@ class mobipocket
 	{
 		$this->_init();
 
-		/* Palm Database */
-		if (!$this->pdb->read($mobipocket_f))
-			return 0;
-
-		/* PalmDOC Header */
-		$pdb_record_0 = $this->pdb->records->record[0]->data;
-		$offset = $this->palmdoc_header->read($pdb_record_0);
-		if ($offset <= 0)
+		if (!parent::read($mobipocket_f))
 			return 0;
 
 		if ($this->is_mobipocket())
 		{
+			$pdb_record_0 = $this->pdb_records->record[0]->data;
+
 			/* MOBI Header */
-			$offset =  $this->mobi_header->read($pdb_record_0, 
-			   $offset);
+			$offset =  $this->mobi_header->read(
+			   $pdb_record_0, palmdoc_header::PALMDOC_HEADER_LEN);
 			if ($offset <= 0)
 				return 0;
 
@@ -88,8 +79,8 @@ class mobipocket
 	 */
 	public function is_mobipocket()
 	{
-		return $this->pdb->is_pdb_type(pdb::PDB_TYPE_MOBI, 
-		   pdb::PDB_CREATOR_MOBI);
+		return $this->is_pdb_type(self::PDB_TYPE_MOBI, 
+		   self::PDB_CREATOR_MOBI);
 	}
 
 	/**
@@ -98,7 +89,7 @@ class mobipocket
 	 */
 	private function _read_full_name()
 	{
-		$pdb_record_0 = $this->pdb->records->record[0]->data;
+		$pdb_record_0 = $this->pdb_records->record[0]->data;
 		$offset = $this->mobi_header->full_name_offset;
 		$length = $this->mobi_header->full_name_length;
 
@@ -219,7 +210,7 @@ class mobipocket
 		if (!$this->image_record_length($index))
 			return "";
 
-		return $this->pdb->records->record[$index]->data;
+		return $this->pdb_records->record[$index]->data;
 	}
 
 	/**
@@ -233,7 +224,7 @@ class mobipocket
 		if (!$this->is_image_record_index($index))
 			return 0;
 
-		return $this->pdb->records->data_len($index);
+		return $this->pdb_records->data_len($index);
 	}
 
 	/**
@@ -263,7 +254,6 @@ class mobipocket
 		return (($start_index > 0) && ($end_index >= $start_index) && 
 		   ($index >= $start_index) && ($index <= $end_index));
 	}
-
 }
 
 ?>

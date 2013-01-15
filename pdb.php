@@ -16,8 +16,8 @@ class pdb
 	const PDB_TYPE_PALMDOC = 'TEXt';	/* Type: PalmDOC */
 	const PDB_CREATOR_PALMDOC = 'REAd';	/* Creator: PalmDOC */
 
-	public $header;
-	public $records;
+	public $pdb_header;
+	public $pdb_records;
 
 	/**
          * Create new Palm Database instance.
@@ -30,10 +30,10 @@ class pdb
 	/**
          * Initialise Palm Database.
          */
-	private function _init()
+	protected function _init()
 	{
-		$this->header = new pdb_header();
-		$this->records = new pdb_records();
+		$this->pdb_header = new pdb_header();
+		$this->pdb_records = new pdb_records();
 	}
 
 	/**
@@ -46,10 +46,10 @@ class pdb
 		if (!is_resource($pdb_f))
 			return 0;
 
-		if (!$this->header->read($pdb_f))
+		if (!$this->pdb_header->read($pdb_f))
 			return 0;
 
-		if (!$this->records->read($pdb_f))
+		if (!$this->pdb_records->read($pdb_f))
 			return 0;
 
 		return 1;
@@ -63,8 +63,8 @@ class pdb
 	 */
 	public function is_pdb_type($type, $creator)
 	{
-		return ($this->header->type == $type) && 
-		   ($this->header->creator == $creator);
+		return ($this->pdb_header->type == $type) && 
+		   ($this->pdb_header->creator == $creator);
 	}
 }
 
@@ -306,7 +306,7 @@ class pdb_records
 			$offset = $this->record[$i]->record_offset;
 
 			if (ftell($pdb_f) != $offset)
-				fseek($pdb_f, $offset, 0);
+				fseek($pdb_f, $offset);
 			
 			if ($len = $this->data_len($i))
 			{

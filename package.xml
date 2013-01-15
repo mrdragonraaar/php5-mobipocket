@@ -27,11 +27,12 @@
 	<contents>
 		<dir name="/">
 			<file baseinstalldir="mobipocket" name="mobipocket.php" role="php" />
-			<file baseinstalldir="mobipocket" name="pdb.php" role="php" />
-			<file baseinstalldir="mobipocket" name="palmdoc_header.php" role="php" />
-			<file baseinstalldir="mobipocket" name="base_header.php" role="php" />
-			<file baseinstalldir="mobipocket" name="mobi_header.php" role="php" />
 			<file baseinstalldir="mobipocket" name="exth_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="mobi_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="base_header.php" role="php" />
+			<file baseinstalldir="mobipocket" name="palmdoc.php" role="php" />
+			<file baseinstalldir="mobipocket" name="lz77.php" role="php" />
+			<file baseinstalldir="mobipocket" name="pdb.php" role="php" />
 		</dir>
 	</contents>
 	<dependencies>
