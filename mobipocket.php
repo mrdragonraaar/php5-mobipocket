@@ -254,6 +254,101 @@ class mobipocket extends palmdoc
 		return (($start_index > 0) && ($end_index >= $start_index) && 
 		   ($index >= $start_index) && ($index <= $end_index));
 	}
+
+	/**
+	 * Get the MOBIPocket html.
+	 * @return html.
+	 */
+	public function html()
+	{
+		if ($html = $this->text())
+		{
+			/* Add anchors at filepos. */
+			$html = self::html_anchors($html);
+
+			/* Add charset for correct dom parsing. */
+			$charset = $this->text_encoding_str();
+			$html = preg_replace('/<head>/', 
+			   '<head><meta http-equiv="Content-type" content="text/html; charset=' . $charset . '"/>', 
+			   $html);
+
+			$doc = new DOMDocument();
+			libxml_use_internal_errors(true);
+			$doc->loadHTML($html);
+			libxml_clear_errors();
+
+			/* Anchors: Replace 'filepos' with 'href'. */
+			foreach ($doc->getElementsByTagName('a') as $anchor)
+			{
+				if ($filepos = $anchor->getAttribute('filepos'))
+				{
+					$anchor->removeAttribute('filepos');
+					$anchor->setAttribute('href', 
+					   '#' . $filepos);
+				}
+			}
+
+			/* Images: Replace 'recindex' with 'src'. */
+			foreach ($doc->getElementsByTagName('img') as $img)
+			{
+				if ($img->hasAttribute('alt'))
+					$img->removeAttribute('alt');
+
+				if ($recindex = $img->getAttribute('recindex'))
+				{
+					$img->removeAttribute('recindex');
+					$recindex = $this->image_record_offset2index($recindex - 1);
+					if ($image = $this->image_record($recindex))
+						$img->setAttribute('src', 'data:image/jpg;base64,' . base64_encode($image));
+				}
+			}
+
+			return $doc->saveHTML();
+		}
+
+		return "";
+	}
+
+	/**
+	 * Add html anchors at 'filepos' in MOBIPocket html.
+	 * @param $html MOBIPocket html.
+	 * @return html.
+	 */
+	private static function html_anchors($html)
+	{
+		$positions = self::anchor_filepos($html);
+
+		$new_html = '';
+		$prev_pos = 0;
+		foreach ($positions as $position)
+		{
+			$new_html .= substr($html, $prev_pos, 
+			   $position - $prev_pos);
+			$new_html .= '<a id="' . $position . '"></a>';
+			$prev_pos = $position;
+		}
+		$new_html .= substr($html, $prev_pos, strlen($html));
+
+		return $new_html;
+	}
+
+	/**
+	 * Get array of unique 'filepos' from MOBIPocket html.
+	 * @param $html MOBIPocket html.
+	 * @return array of filepos.
+	 */
+	private static function anchor_filepos($html)
+	{
+		$positions = array();
+		if (preg_match_all('/filepos=(\d+)/', $html, $positions))
+		{
+			$positions = array_unique($positions[1], SORT_NUMERIC);
+			sort($positions, SORT_NUMERIC);
+			return $positions;
+		}
+
+		return array();
+	}
 }
 
 ?>
