@@ -347,6 +347,7 @@ class exth_header extends base_header
 
 	/**
          * Get the publishing date from EXTH records as UTC.
+         * Will only return result if date after 1901-12-13.
 	 * @return publishing date as UTC.
          */
 	public function publishing_date_utc()
@@ -363,12 +364,11 @@ class exth_header extends base_header
          */
 	public function publishing_date_str($format = 'F d Y')
 	{
-		$publish_date_utc = $this->publishing_date_utc();
+		$publish_date = $this->publishing_date();
 
-		if ($publish_date_utc > -1)
-			return date($format, $publish_date_utc);
+		$date = date_create($publish_date);
 
-		return "";
+		return $date ? date_format($date, $format) : "";
 	}
 
 	/**
