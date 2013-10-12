@@ -18,6 +18,7 @@ class pdb
 
 	public $pdb_header;
 	public $pdb_records;
+	protected $pdb_f;
 
 	/**
          * Create new Palm Database instance.
@@ -34,6 +35,31 @@ class pdb
 	{
 		$this->pdb_header = new pdb_header();
 		$this->pdb_records = new pdb_records();
+	}
+
+	/**
+	 * Open and read Palm Database file.
+	 * @param $pdb_file PDB file.
+	 * @return non-zero on success.
+	 */
+	public function open($pdb_file)
+	{
+		if ($fh = fopen($file, "r"))
+		{
+			$this->pdb_f = $fh;
+			return $this->read($this->pdb_f);
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Close Palm Database file.
+	 * @return non-zero on success.
+	 */
+	public function close()
+	{
+		return fclose($this->pdb_f);
 	}
 
 	/**
