@@ -44,7 +44,7 @@ class pdb
 	 */
 	public function open($pdb_file)
 	{
-		if ($fh = fopen($file, "r"))
+		if ($fh = fopen($pdb_file, "r"))
 		{
 			$this->pdb_f = $fh;
 			return $this->read($this->pdb_f);
