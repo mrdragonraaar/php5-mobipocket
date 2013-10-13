@@ -31,6 +31,7 @@ class mobipocket extends palmdoc
 	protected function _init()
 	{
 		parent::_init();
+		$this->set_mobipocket_type();
 		$this->mobi_header = new mobi_header();
 		$this->exth_header = new exth_header();
 		$this->full_name = "";
@@ -80,6 +81,15 @@ class mobipocket extends palmdoc
 	public function is_mobipocket()
 	{
 		return $this->is_pdb_type(self::PDB_TYPE_MOBI, 
+		   self::PDB_CREATOR_MOBI);
+	}
+
+	/**
+	 * Set type and creator of Palm Database to MOBIPocket.
+	 */
+	public function set_mobipocket_type()
+	{
+		$this->set_pdb_type(self::PDB_TYPE_MOBI, 
 		   self::PDB_CREATOR_MOBI);
 	}
 

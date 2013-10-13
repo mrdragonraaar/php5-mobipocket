@@ -38,6 +38,7 @@ class palmdoc extends pdb
 	protected function _init()
 	{
 		parent::_init();
+		$this->set_palmdoc_type();
 		$this->palmdoc_header = new palmdoc_header();
 	}
 
@@ -68,6 +69,15 @@ class palmdoc extends pdb
 	public function is_palmdoc()
 	{
 		return $this->is_pdb_type(self::PDB_TYPE_PALMDOC, 
+		   self::PDB_CREATOR_PALMDOC);
+	}
+
+	/**
+	 * Set type and creator of Palm Database to PalmDOC.
+	 */
+	public function set_palmdoc_type()
+	{
+		$this->set_pdb_type(self::PDB_TYPE_PALMDOC, 
 		   self::PDB_CREATOR_PALMDOC);
 	}
 

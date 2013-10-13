@@ -123,6 +123,17 @@ class pdb
 		return ($this->pdb_header->type == $type) && 
 		   ($this->pdb_header->creator == $creator);
 	}
+
+	/**
+	 * Set type and creator of Palm Database.
+	 * @param $type type string.
+	 * @param $creator creator string.
+	 */
+	public function set_pdb_type($type, $creator)
+	{
+		$this->pdb_header->type = $type;
+		$this->pdb_header->creator = $creator;
+	}
 }
 
 /**
