@@ -445,7 +445,7 @@ class pdb_records
 			$pdb_record = new pdb_record();
 			if (!$pdb_record->read($pdb_f))
 				return 0;
-			$this->record[] = $pdb_record;
+			$this->record[$i] = $pdb_record;
 		}
 
 		return 1;
