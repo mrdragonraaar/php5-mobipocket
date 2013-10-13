@@ -13,7 +13,7 @@ include_once('lz77.php');
 class palmdoc extends pdb
 {
 	/* Compression */
-	const COMPRESSION_NONE = 0;		/* No compression */
+	const COMPRESSION_NONE = 1;		/* No compression */
 	const COMPRESSION_PALMDOC = 2;		/* PalmDOC compression */
 	const COMPRESSION_HUFF_CDIC = 17480;	/* HUFF/CDIC compression */
 
@@ -185,9 +185,8 @@ class palmdoc extends pdb
 	 */
 	private function valid_palmdoc()
 	{
-		return ($this->palmdoc_header->record_count &&
-		   $this->valid_encryption() && 
-		   $this->valid_compression());
+		return $this->valid_encryption() && 
+		   $this->valid_compression();
 	}
 
 	/**
@@ -316,12 +315,12 @@ class palmdoc_header
          */
 	private function _init()
 	{
-		$this->compression = 0;
+		$this->compression = palmdoc::COMPRESSION_PALMDOC;
 		$this->unused = 0;
 		$this->text_length = 0;
 		$this->record_count = 0;
-		$this->record_size = 0;
-		$this->encryption_type = 0;
+		$this->record_size = 4096;
+		$this->encryption_type = palmdoc::ENCRYPTION_NONE;
 		$this->unknown = 0;
 	}
 
@@ -369,6 +368,23 @@ class palmdoc_header
 		}
 
 		return -1;
+	}
+
+	/**
+	 * Get packed PalmDOC header.
+	 * @return packed PalmDOC header.
+	 */
+	public function write()
+	{
+		return pack("nnNnnnn",
+		   $this->compression,
+		   $this->unused,
+		   $this->text_length,
+		   $this->record_count,
+		   $this->record_size,
+		   $this->encryption_type,
+		   $this->unknown
+		);
 	}
 
 	/**
