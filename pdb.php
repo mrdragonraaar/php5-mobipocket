@@ -18,7 +18,6 @@ class pdb
 
 	public $pdb_header;
 	public $pdb_records;
-	protected $pdb_f;
 
 	/**
          * Create new Palm Database instance.
@@ -38,28 +37,22 @@ class pdb
 	}
 
 	/**
-	 * Open and read Palm Database file.
+	 * Load Palm Database file.
 	 * @param $pdb_file PDB file.
 	 * @return non-zero on success.
 	 */
-	public function open($pdb_file)
+	public function load($pdb_file)
 	{
-		if ($fh = fopen($pdb_file, "r"))
+		$rv = 0;
+
+		if ($pdb_f = fopen($pdb_file, "r"))
 		{
-			$this->pdb_f = $fh;
-			return $this->read($this->pdb_f);
+			$rv = $this->read($pdb_f);
+
+			fclose($pdb_f);
 		}
 
-		return 0;
-	}
-
-	/**
-	 * Close Palm Database file.
-	 * @return non-zero on success.
-	 */
-	public function close()
-	{
-		return fclose($this->pdb_f);
+		return $rv;
 	}
 
 	/**
@@ -76,6 +69,44 @@ class pdb
 			return 0;
 
 		if (!$this->pdb_records->read($pdb_f))
+			return 0;
+
+		return 1;
+	}
+
+	/**
+	 * Save Palm Database file.
+	 * @param $pdb_file PDB file.
+	 * @return non-zero on success.
+	 */
+	public function save($pdb_file)
+	{
+		$rv = 0;
+
+		if ($pdb_f = fopen($pdb_file, "w"))
+		{
+			$rv = $this->write($pdb_f);
+
+			fclose($pdb_f);
+		}
+
+		return $rv;
+	}
+
+	/**
+	 * Write Palm Database to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	public function write($pdb_f)
+	{
+		if (!is_resource($pdb_f))
+			return 0;
+
+		if (!$this->pdb_header->write($pdb_f))
+			return 0;
+
+		if (!$this->pdb_records->write($pdb_f))
 			return 0;
 
 		return 1;
@@ -197,6 +228,34 @@ class pdb_header
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Write Palm Database header to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	public function write($pdb_f)
+	{
+		if (!is_resource($pdb_f))
+			return 0;
+
+		$h_buf = pack("a32nnNNNNNNa4a4N",
+		   $this->name,
+		   $this->attributes,
+		   $this->version,
+		   $this->ctime,
+		   $this->mtime,
+		   $this->baktime,
+		   $this->modnum,
+		   $this->appinfo_id,
+		   $this->sortinfo_id,
+		   $this->type,
+		   $this->creator,
+		   $this->unique_id_seed
+		);
+
+		return fwrite($pdb_f, $h_buf);
 	}
 
 	/**
@@ -364,6 +423,84 @@ class pdb_records
 	}
 
 	/**
+	 * Write Palm Database records to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	public function write($pdb_f)
+	{
+		if (!is_resource($pdb_f))
+			return 0;
+
+		if ($this->_write_header($pdb_f))
+			if ($this->_write_info($pdb_f))
+				if (fwrite($pdb_f, pack("xx")))
+					if ($this->_write_data($pdb_f))
+						return 1;
+
+		return 0;
+	}
+
+	/**
+	 * Write Palm Database records header to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	private function _write_header($pdb_f)
+	{
+		$recs_h_buf = pack("Nn",
+		   $this->next_record_id,
+		   $this->num_records
+		);
+
+		return fwrite($pdb_f, $recs_h_buf);
+	}
+
+	/**
+	 * Write Palm Database records info to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	private function _write_info($pdb_f)
+	{
+		for ($i = 0; $i < $this->num_records; $i++)
+		{
+			if (!isset($this->record[$i]))
+				return 0;
+
+			if (!$this->record[$i]->write($pdb_f))
+				return 0;
+		}
+
+		return 1;
+	}
+
+	/**
+	 * Write Palm Database records data to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	private function _write_data($pdb_f)
+	{
+		for ($i = 0; $i < $this->num_records; $i++)
+		{
+			if (!isset($this->record[$i]))
+				return 0;
+
+			$offset = $this->record[$i]->record_offset;
+
+			if (ftell($pdb_f) != $offset)
+				fseek($pdb_f, $offset);
+			
+			if (!fwrite($pdb_f, $this->record[$i]->data,
+			   $this->data_len($i)))
+				return 0;
+		}
+
+		return 1;
+	}
+
+	/**
 	 * Print Palm Database records header.
 	 */
 	public function display_header()
@@ -480,6 +617,31 @@ class pdb_record
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Write Palm Database record info to open file stream.
+	 * @param $pdb_f open file stream of PDB file.
+	 * @return non-zero on success.
+	 */
+	public function write($pdb_f)
+	{
+		if (!is_resource($pdb_f))
+			return 0;
+
+		$unique_id1 = ($this->unique_id >> 16);
+		$unique_id2 = ($this->unique_id >> 8);
+		$unique_id3 = $this->unique_id;
+
+		$info_buf = pack("NCCCC",
+		   $this->record_offset,
+		   $this->record_attributes,
+		   $unique_id1,
+		   $unique_id2,
+		   $unique_id3
+		);
+
+		return fwrite($pdb_f, $info_buf);
 	}
 }
 
