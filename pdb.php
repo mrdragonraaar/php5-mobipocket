@@ -113,6 +113,31 @@ class pdb
 	}
 
 	/**
+	 * Set name of Palm Database.
+	 * @param $name name.
+	 */
+	public function set_pdb_name($name)
+	{
+		$this->pdb_header->set_name($name);
+	}
+
+	/**
+	 * Set creation date of Palm Database to now.
+	 */
+	public function set_pdb_ctime()
+	{
+		$this->pdb_header->set_ctime();
+	}
+
+	/**
+	 * Set modification date of Palm Database to now.
+	 */
+	public function set_pdb_mtime()
+	{
+		$this->pdb_header->set_mtime();
+	}
+
+	/**
 	 * Check type and creator of Palm Database.
 	 * @param $type type string.
 	 * @param $creator creator string.
@@ -131,8 +156,7 @@ class pdb
 	 */
 	public function set_pdb_type($type, $creator)
 	{
-		$this->pdb_header->type = $type;
-		$this->pdb_header->creator = $creator;
+		$this->pdb_header->set_type($type, $creator);
 	}
 }
 
@@ -170,11 +194,11 @@ class pdb_header
          */
 	private function _init()
 	{
-		$this->name = "";
+		$this->set_name('');
 		$this->attributes = 0;
 		$this->version = 0;
-		$this->ctime = 0;
-		$this->mtime = 0;
+		$this->set_ctime();
+		$this->set_mtime();
 		$this->baktime = 0;
 		$this->modnum = 0;
 		$this->appinfo_id = 0;
@@ -182,6 +206,46 @@ class pdb_header
 		$this->type = "";
 		$this->creator = "";
 		$this->unique_id_seed = 0;
+	}
+
+	/**
+	 * Set name in Palm Database header.
+	 * @param $name name.
+	 */
+	public function set_name($name)
+	{
+		$name = preg_replace('/[^-A-Za-z0-9 ]+/', '_', $name);
+		$name = substr($name, 0, 31);
+		$name = str_pad($name, 32, "\0");
+
+		$this->name = $name;
+	}
+
+	/**
+	 * Set creation date in Palm Database header to now.
+	 */
+	public function set_ctime()
+	{
+		$this->ctime = time();
+	}
+
+	/**
+	 * Set modification date in Palm Database header to now.
+	 */
+	public function set_mtime()
+	{
+		$this->mtime = time();
+	}
+
+	/**
+	 * Set type and creator in Palm Database header.
+	 * @param $type type string.
+	 * @param $creator creator string.
+	 */
+	public function set_type($type, $creator)
+	{
+		$this->type = $type;
+		$this->creator = $creator;
 	}
 
 	/**
@@ -503,8 +567,7 @@ class pdb_records
 			if (ftell($pdb_f) != $offset)
 				fseek($pdb_f, $offset);
 			
-			if (!fwrite($pdb_f, $this->record[$i]->data,
-			   $this->data_len($i)))
+			if (!fwrite($pdb_f, $this->record[$i]->data))
 				return 0;
 		}
 
