@@ -53,10 +53,15 @@ class palmdoc extends pdb
 
 		if (parent::read($palmdoc_f))
 		{
-			$pdb_record_0 = $this->pdb_records->record[0]->data;
-			$offset = $this->palmdoc_header->read($pdb_record_0);
-			if (($offset > 0) && $this->valid_palmdoc())
-				return 1;
+			if (isset($this->pdb_records->record[0]))
+			{
+				$pdb_record_0 = 
+				   $this->pdb_records->record[0]->data;
+				$offset = 
+				   $this->palmdoc_header->read($pdb_record_0);
+				if (($offset > 0) && $this->valid_palmdoc())
+					return 1;
+			}
 		}
 
 		return 0;
