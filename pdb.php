@@ -158,6 +158,30 @@ class pdb
 	{
 		$this->pdb_header->set_type($type, $creator);
 	}
+
+	/**
+	 * Add Palm Database record.
+	 * @param $data data to add.
+	 * @return palm database record.
+	 */
+	public function add_pdb_record($data)
+	{
+		$pdb_record = $this->pdb_records->add_record($data);
+		$this->pdb_header->unique_id_seed = $this->pdb_records->num_records;
+
+		return $pdb_record;
+	}
+
+	/**
+	 * Set Palm Database record.
+	 * @param $rec_index index of record.
+	 * @param $data data to set.
+	 * @return palm database record.
+	 */
+	public function set_pdb_record($rec_index, $data)
+	{
+		return $this->pdb_records->set_record($rec_index, $data);
+	}
 }
 
 /**
@@ -464,7 +488,6 @@ class pdb_records
 				return 0;
 
 			$offset = $this->record[$i]->record_offset;
-
 			if (ftell($pdb_f) != $offset)
 				fseek($pdb_f, $offset);
 			
@@ -572,6 +595,73 @@ class pdb_records
 		}
 
 		return 1;
+	}
+
+	/**
+	 * Add Palm Database record.
+	 * @param $data data to add.
+	 * @return palm database record.
+	 */
+	public function add_record($data)
+	{
+		$this->num_records++;
+		$rec_index = $this->num_records - 1;
+
+		$pdb_record = new pdb_record();
+		$pdb_record->data = $data;
+		$pdb_record->unique_id = $rec_index;
+
+		// calculate new record offsets
+		for ($i = 0; $i < $rec_index; $i++)
+			$this->record[$i]->record_offset +=
+			   pdb_record::PDB_RECORD_INFO_LEN;
+
+		if ($rec_index == 0)
+			$pdb_record->record_offset = 
+			   $this->base_record_offset();
+		else
+			$pdb_record->record_offset = 
+			   $this->record[$rec_index-1]->record_offset +
+			   strlen($this->record[$rec_index-1]->data);
+
+		return $this->record[$rec_index] = $pdb_record;
+	}
+
+	/**
+	 * Set Palm Database record.
+	 * @param $rec_index index of record.
+	 * @param $data data to set.
+	 * @return palm database record.
+	 */
+	public function set_record($rec_index, $data)
+	{
+		if (($rec_index < 0) || ($rec_index > $this->num_records - 1))
+			return 0;
+
+		$this->record[$rec_index]->data = $data;
+
+		// calculate new record offsets for records after this one
+		for ($i = $rec_index + 1; $i < $this->num_records; $i++)
+			$this->record[$i]->record_offset =
+			   $this->record[$i-1]->record_offset +
+			   strlen($this->record[$i-1]->data);
+
+		return $this->record[$rec_index];
+	}
+
+	/**
+	 * Get record offset to start of data.
+	 * @return base record offset.
+	 */
+	public function base_record_offset()
+	{
+		$record_offset = pdb_header::PDB_HEADER_LEN;
+		$record_offset += pdb_records::PDB_RECORDS_HEADER_LEN;
+		$record_offset += pdb_record::PDB_RECORD_INFO_LEN *
+		   $this->num_records;
+		$record_offset += 2;
+
+		return $record_offset;
 	}
 
 	/**
