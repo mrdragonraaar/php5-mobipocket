@@ -22,6 +22,8 @@ class palmdoc extends pdb
 	const ENCRYPTION_MOBI_OLD = 1;	/* Old Mobipocket encryption */
 	const ENCRYPTION_MOBI = 2;	/* Mobipocket encryption */
 
+	const MAX_RECORD_SIZE = 4096;	/* Maximum text record size */
+
 	public $palmdoc_header;
 
 	/**
@@ -30,6 +32,7 @@ class palmdoc extends pdb
 	function __construct()
 	{
 		$this->_init();
+		$this->update_pdb_record_0();
 	}
 
 	/**
@@ -43,6 +46,27 @@ class palmdoc extends pdb
 	}
 
 	/**
+         * Update PalmDOC Record 0.
+         */
+	public function update_pdb_record_0()
+	{
+		$data = $this->_pdb_record_0_data();
+
+		if (isset($this->pdb_records->record[0]))
+			return $this->set_pdb_record(0, $data);
+
+		return $this->add_pdb_record($data);
+	}
+
+	/**
+         * Get PalmDOC Record 0 data from PalmDOC header.
+         */
+	protected function _pdb_record_0_data()
+	{
+		return $this->palmdoc_header->write();
+	}
+
+	/**
 	 * Read PalmDOC from open file stream.
 	 * @param $palmdoc_f open file stream of PalmDOC file.
 	 * @return non-zero on success.
@@ -50,6 +74,7 @@ class palmdoc extends pdb
 	public function read($palmdoc_f)
 	{
 		$this->_init();
+		$this->update_pdb_record_0();
 
 		if (parent::read($palmdoc_f))
 		{
@@ -65,6 +90,18 @@ class palmdoc extends pdb
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Write PalmDOC to open file stream.
+	 * @param $palmdoc_f open file stream of PalmDOC file.
+	 * @return non-zero on success.
+	 */
+	public function write($palmdoc_f)
+	{
+		$this->update_pdb_record_0();
+
+		return parent::write($palmdoc_f);
 	}
 
 	/**
@@ -135,6 +172,43 @@ class palmdoc extends pdb
 	}
 
 	/**
+	 * Set PalmDOC compression to no compression.
+	 * @return no compression value.
+	 */
+	public function set_compression_none()
+	{
+		return $this->set_compression(self::COMPRESSION_NONE);
+	}
+
+	/**
+	 * Set PalmDOC compression to palmdoc compression.
+	 * @return palmdoc compression value.
+	 */
+	public function set_compression_palmdoc()
+	{
+		return $this->set_compression(self::COMPRESSION_PALMDOC);
+	}
+
+	/**
+	 * Set PalmDOC header compression to huff/cdic compression.
+	 * @return huff/cdic compression value.
+	 */
+	public function set_compression_huff_cdic()
+	{
+		return $this->set_compression(self::COMPRESSION_HUFF_CDIC);
+	}
+
+	/**
+	 * Set PalmDOC compression value.
+	 * @param $compression compression value.
+	 * @return new compression value.
+	 */
+	public function set_compression($compression)
+	{
+		return $this->palmdoc_header->compression = $compression;
+	}
+
+	/**
 	 * Check is PalmDOC encryption type is no encryption.
 	 * @return non-zero if encryption type is no encryption.
 	 */
@@ -182,6 +256,44 @@ class palmdoc extends pdb
 		return $this->is_encryption_none() ||
 		   $this->is_encryption_mobi_old() ||
 		   $this->is_encryption_mobi();
+	}
+
+	/**
+	 * Set PalmDOC encryption type to no encryption.
+	 * @return no encryption value.
+	 */
+	public function set_encryption_none()
+	{
+		return $this->set_encryption(self::ENCRYPTION_NONE);
+	}
+
+	/**
+	 * Set PalmDOC encryption type to old MOBIPocket encryption.
+	 * @return old MOBIPocket encryption value.
+	 */
+	public function set_encryption_mobi_old()
+	{
+		return $this->set_encryption(self::ENCRYPTION_MOBI_OLD);
+	}
+
+	/**
+	 * Set PalmDOC encryption type to MOBIPocket encryption.
+	 * @return MOBIPocket encryption value.
+	 */
+	public function set_encryption_mobi()
+	{
+		return $this->set_encryption(self::ENCRYPTION_MOBI);
+	}
+
+	/**
+	 * Set PalmDOC encryption type.
+	 * @param $encryption_type encryption type value.
+	 * @return new encryption type.
+	 */
+	public function set_encryption($encryption_type)
+	{
+		return $this->palmdoc_header->encryption_type = 
+		   $encryption_type;
 	}
 
 	/**
@@ -324,7 +436,7 @@ class palmdoc_header
 		$this->unused = 0;
 		$this->text_length = 0;
 		$this->record_count = 0;
-		$this->record_size = 4096;
+		$this->record_size = palmdoc::MAX_RECORD_SIZE;
 		$this->encryption_type = palmdoc::ENCRYPTION_NONE;
 		$this->unknown = 0;
 	}

@@ -23,6 +23,7 @@ class mobipocket extends palmdoc
 	function __construct()
 	{
 		$this->_init();
+		$this->update_pdb_record_0();
 	}
 
 	/**
@@ -35,6 +36,18 @@ class mobipocket extends palmdoc
 		$this->mobi_header = new mobi_header();
 		$this->exth_header = new exth_header();
 		$this->full_name = "";
+	}
+
+	/**
+         * Get MOBIPocket Record 0 data from MOBIPocket and EXTH headers.
+         */
+	protected function _pdb_record_0_data()
+	{
+		$data = parent::_pdb_record_0_data();
+
+		// append mobi_header and exth_header.
+
+		return $data;
 	}
 
 	/**
