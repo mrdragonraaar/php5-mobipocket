@@ -318,12 +318,12 @@ class palmdoc extends pdb
 
 		/* No Encryption */
 		$start_index = 1;
-		$end_index = $this->palmdoc_header->record_count;
-		if (($start_index <= 0) || ($end_index < $start_index))
+		$end_index = $start_index + $this->palmdoc_header->record_count;
+		if (($start_index <= 0) || ($end_index <= $start_index))
 			return "";
 
 		$text = '';
-		for ($index = $start_index; $index <= $end_index; $index++)
+		for ($index = $start_index; $index < $end_index; $index++)
 			$text .= $this->text_record($index);
 
 		$text_length = $this->palmdoc_header->text_length;
@@ -399,8 +399,8 @@ class palmdoc extends pdb
 		$start_index = 1;
 		$end_index = $start_index + $this->palmdoc_header->record_count;
 
-		return (($start_index > 0) && ($end_index >= $start_index) && 
-		   ($index >= $start_index) && ($index <= $end_index));
+		return (($start_index > 0) && ($end_index > $start_index) && 
+		   ($index >= $start_index) && ($index < $end_index));
 	}
 }
 
