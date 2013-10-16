@@ -188,17 +188,14 @@ class exth_header extends base_header
 			   self::EXTH_RECORD_HEADER_LEN;
 
 			if ($record_length > 0)
-			{
-				if ($exth_record->record_data = 
+				$exth_record->record_data = 
 				   substr($this->data, $record_offset, 
-				   $record_length))
-				{
-					$this->record[] = $exth_record;
+				   $record_length);
 
-					$record_offset += $record_length;
-					return $record_offset;
-				}
-			}
+			$this->record[] = $exth_record;
+
+			$record_offset += $record_length;
+			return $record_offset;
 		}
 
 		return -1;
