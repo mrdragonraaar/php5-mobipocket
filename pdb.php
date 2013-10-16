@@ -173,6 +173,20 @@ class pdb
 	}
 
 	/**
+	 * Insert Palm Database record.
+	 * @param $rec_index index of record.
+	 * @param $data data to insert.
+	 * @return palm database record.
+	 */
+	public function insert_pdb_record($rec_index, $data)
+	{
+		$pdb_record = $this->pdb_records->insert_record($rec_index, $data);
+		$this->pdb_header->unique_id_seed = $this->pdb_records->num_records;
+
+		return $pdb_record;
+	}
+
+	/**
 	 * Set Palm Database record.
 	 * @param $rec_index index of record.
 	 * @param $data data to set.
@@ -190,7 +204,10 @@ class pdb
 	 */
 	public function remove_pdb_record($rec_index)
 	{
-		return $this->pdb_records->remove_record($rec_index);
+		$rv = $this->pdb_records->remove_record($rec_index);
+		$this->pdb_header->unique_id_seed = $this->pdb_records->num_records;
+
+		return $rv;
 	}
 
 	/**
@@ -201,7 +218,10 @@ class pdb
 	 */
 	public function remove_pdb_records($start_index, $end_index)
 	{
-		return $this->pdb_records->remove_records($start_index, $end_index);
+		$rv = $this->pdb_records->remove_records($start_index, $end_index);
+		$this->pdb_header->unique_id_seed = $this->pdb_records->num_records;
+
+		return $rv;
 	}
 }
 
@@ -625,9 +645,24 @@ class pdb_records
 	 */
 	public function add_record($data)
 	{
-		$this->num_records++;
-		$rec_index = $this->num_records - 1;
+		$rec_index = $this->num_records;
 
+		return $this->insert_record($rec_index, $data);
+	}
+
+	/**
+	 * Insert Palm Database record.
+	 * @param $rec_index index of record.
+	 * @param $data data to insert.
+	 * @return palm database record.
+	 */
+	public function insert_record($rec_index, $data)
+	{
+		if (($rec_index < 0) || ($rec_index > $this->num_records))
+			return null;
+
+		$this->num_records++;
+		array_splice($this->record, $rec_index, 0, 0);
 		$this->record[$rec_index] = new pdb_record();
 
 		return $this->set_record($rec_index, $data);
