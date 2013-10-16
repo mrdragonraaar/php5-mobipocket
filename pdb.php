@@ -182,6 +182,27 @@ class pdb
 	{
 		return $this->pdb_records->set_record($rec_index, $data);
 	}
+
+	/**
+	 * Remove Palm Database record.
+	 * @param $rec_index index of record.
+	 * @return true if removed.
+	 */
+	public function remove_pdb_record($rec_index)
+	{
+		return $this->pdb_records->remove_record($rec_index);
+	}
+
+	/**
+	 * Remove a range of Palm Database records.
+	 * @param $start_index start index of records.
+	 * @param $end_index end index of records.
+	 * @return true if removed.
+	 */
+	public function remove_pdb_records($start_index, $end_index)
+	{
+		return $this->pdb_records->remove_records($start_index, $end_index);
+	}
 }
 
 /**
@@ -607,24 +628,9 @@ class pdb_records
 		$this->num_records++;
 		$rec_index = $this->num_records - 1;
 
-		$pdb_record = new pdb_record();
-		$pdb_record->data = $data;
-		$pdb_record->unique_id = $rec_index;
+		$this->record[$rec_index] = new pdb_record();
 
-		// calculate new record offsets
-		for ($i = 0; $i < $rec_index; $i++)
-			$this->record[$i]->record_offset +=
-			   pdb_record::PDB_RECORD_INFO_LEN;
-
-		if ($rec_index == 0)
-			$pdb_record->record_offset = 
-			   $this->base_record_offset();
-		else
-			$pdb_record->record_offset = 
-			   $this->record[$rec_index-1]->record_offset +
-			   strlen($this->record[$rec_index-1]->data);
-
-		return $this->record[$rec_index] = $pdb_record;
+		return $this->set_record($rec_index, $data);
 	}
 
 	/**
@@ -636,17 +642,67 @@ class pdb_records
 	public function set_record($rec_index, $data)
 	{
 		if (($rec_index < 0) || ($rec_index > $this->num_records - 1))
-			return 0;
+			return null;
 
 		$this->record[$rec_index]->data = $data;
 
-		// calculate new record offsets for records after this one
-		for ($i = $rec_index + 1; $i < $this->num_records; $i++)
-			$this->record[$i]->record_offset =
-			   $this->record[$i-1]->record_offset +
-			   strlen($this->record[$i-1]->data);
+		// calculate new record offsets
+		$this->calc_record_offsets();
 
 		return $this->record[$rec_index];
+	}
+
+	/**
+	 * Remove Palm Database record.
+	 * @param $rec_index index of record.
+	 * @return true if removed.
+	 */
+	public function remove_record($rec_index)
+	{
+		return $this->remove_records($rec_index, $rec_index);
+	}
+
+	/**
+	 * Remove a range of Palm Database records.
+	 * @param $start_index start index of records.
+	 * @param $end_index end index of records.
+	 * @return true if removed.
+	 */
+	public function remove_records($start_index, $end_index)
+	{
+		if (($start_index < 0) || ($end_index < $start_index) || 
+		   ($end_index >= $this->num_records))
+			return false;
+
+		for ($i = $start_index; $i <= $end_index; $i++)
+			unset($this->record[$i]);
+		$this->record = array_values($this->record);
+		$this->num_records -= ($end_index - $start_index + 1);
+
+		// calculate new record offsets
+		$this->calc_record_offsets();
+
+		return true;
+	}
+
+	/**
+	 * Calculate record offsets.
+	 * @param $start_index record index to start from.
+	 */
+	public function calc_record_offsets($start_index = 0)
+	{
+		for ($i = $start_index; $i < $this->num_records; $i++)
+		{
+			if ($i == 0)
+				$this->record[0]->record_offset = 
+				   $this->base_record_offset();
+			else
+				$this->record[$i]->record_offset =
+				   $this->record[$i-1]->record_offset +
+				   strlen($this->record[$i-1]->data);
+
+			$this->record[$i]->unique_id = $i;
+		}
 	}
 
 	/**
@@ -659,7 +715,7 @@ class pdb_records
 		$record_offset += pdb_records::PDB_RECORDS_HEADER_LEN;
 		$record_offset += pdb_record::PDB_RECORD_INFO_LEN *
 		   $this->num_records;
-		$record_offset += 2;
+		$record_offset += 2; // gap to data
 
 		return $record_offset;
 	}
