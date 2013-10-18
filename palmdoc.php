@@ -375,6 +375,57 @@ class palmdoc extends pdb
 	}
 
 	/**
+	 * Set the PalmDOC text.
+	 */
+	public function set_text($text)
+	{
+		$this->remove_text_records();
+		while (strlen($text) > self::MAX_RECORD_SIZE)
+		{
+			$text_record = substr($text, 0, self::MAX_RECORD_SIZE);
+			$text = substr($text, self::MAX_RECORD_SIZE);
+			$this->add_text_record($text_record);
+		}
+		$this->add_text_record($text);
+	}
+
+	/**
+	 * Add a PalmDOC text record.
+	 * @param $text text of record.
+	 * @return text record.
+	 */
+	public function add_text_record($text)
+	{
+		if (strlen($text) == 0)
+			return null;
+
+		if (strlen($text) > self::MAX_RECORD_SIZE)
+			$text = substr($text, 0, self::MAX_RECORD_SIZE);
+
+		$rec_index = $this->palmdoc_header->record_count + 1;
+		$this->palmdoc_header->record_count++;
+		$this->palmdoc_header->text_length += strlen($text);
+
+		if ($this->is_compression_palmdoc())
+			$text = lz77_encode($text);
+
+		return $this->insert_pdb_record($rec_index, $text);
+	}
+
+	/**
+	 * Remove all PalmDOC text records.
+	 * @return true if removed.
+	 */
+	public function remove_text_records()
+	{
+		$record_count = $this->palmdoc_header->record_count;
+		$this->palmdoc_header->record_count = 0;
+		$this->palmdoc_header->text_length = 0;
+		
+		return $this->remove_pdb_records(1, $record_count);
+	}
+
+	/**
 	 * Get the index of text record in the Palm Database records 
 	 *    from offset.
 	 * @param $offset offset of text record.
