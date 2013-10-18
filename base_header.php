@@ -81,6 +81,18 @@ class base_header
 	}
 
 	/**
+	 * Get packed base header.
+	 * @return packed base header.
+	 */
+	public function write()
+	{
+		return pack("a4N",
+			$this->identifier,
+			$this->header_length
+		) . $this->data;
+	}
+
+	/**
 	 * Check if header is of header type.
 	 * @param $header_type header type string.
 	 * @return non-zero if header is of header type.

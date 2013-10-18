@@ -12,6 +12,9 @@ include_once('base_header.php');
 class mobi_header extends base_header
 {
 	const HEADER_TYPE_MOBI = "MOBI";	/* Header Type: MOBI */
+	const MOBI_HEADER_LEN = 232;		/* Initial header length */
+
+	const MOBI_VERSION = 6;			/* MobiPocket version */
 
 	/* MOBIPocket File Type */
 	const MOBI_TYPE_MOBIPOCKET = 2;	/* MOBIPocket */
@@ -48,6 +51,16 @@ class mobi_header extends base_header
 	const MOBI_ENCODING_UTF8 = 65001;	/* UTF-8 */
 	const MOBI_ENCODING_WINLATIN1_STR = "iso-8859-1";
 	const MOBI_ENCODING_UTF8_STR = "UTF-8";
+
+	/* Locales */
+	const LOCALE_ENGLISH = 0x09;		/* English */
+	const LOCALE_ENGLISH_UK = 0x809;	/* English (UK) */
+	const LOCALE_ENGLISH_US = 0x409;	/* English (US) */
+
+	/* EXTH Flags */
+	const EXTH_FLAG_NONE = 0x00;		/* No flags */
+	const EXTH_FLAG_HEADER = 0x40;		/* EXTH header is present */
+	const EXTH_FLAG_FONTS = 0x1000;		/* Embedded fonts are present */
 
 	public $mobi_type;
 	public $text_encoding;
@@ -103,45 +116,47 @@ class mobi_header extends base_header
 	protected function _init()
 	{
 		parent::_init();
-		$this->mobi_type = 0;
-		$this->text_encoding = 0;
-		$this->unique_id = 0;
-		$this->file_version = 0;
-		$this->ortographic_index = 0;
-		$this->inflection_index = 0;
-		$this->index_names = 0;
-		$this->index_keys = 0;
-		$this->extra_index_0 = 0;
-		$this->extra_index_1 = 0;
-		$this->extra_index_2 = 0;
-		$this->extra_index_3 = 0;
-		$this->extra_index_4 = 0;
-		$this->extra_index_5 = 0;
-		$this->first_non_book_index = 0;
+		$this->identifier = self::HEADER_TYPE_MOBI;
+		$this->header_length = self::MOBI_HEADER_LEN;
+		$this->mobi_type = self::MOBI_TYPE_MOBIPOCKET;
+		$this->text_encoding = self::MOBI_ENCODING_UTF8;
+		$this->unique_id = rand();
+		$this->file_version = self::MOBI_VERSION;
+		$this->ortographic_index = -1;
+		$this->inflection_index = -1;
+		$this->index_names = -1;
+		$this->index_keys = -1;
+		$this->extra_index_0 = -1;
+		$this->extra_index_1 = -1;
+		$this->extra_index_2 = -1;
+		$this->extra_index_3 = -1;
+		$this->extra_index_4 = -1;
+		$this->extra_index_5 = -1;
+		$this->first_non_book_index = -1;
 		$this->full_name_offset = 0;
 		$this->full_name_length = 0;
-		$this->locale = 0;
+		$this->locale = self::LOCALE_ENGLISH;
 		$this->input_language = 0;
 		$this->output_language = 0;
-		$this->min_version = 0;
-		$this->first_image_index = 0;
+		$this->min_version = self::MOBI_VERSION;
+		$this->first_image_index = -1;
 		$this->huffman_record_offset = 0;
 		$this->huffman_record_count = 0;
 		$this->huffman_table_offset = 0;
 		$this->huffman_table_length = 0;
-		$this->exth_flags = 0;
-		$this->drm_offset = 0;
-		$this->drm_count = 0;
+		$this->exth_flags = self::EXTH_FLAG_HEADER;
+		$this->drm_offset = -1;
+		$this->drm_count = -1;
 		$this->drm_size = 0;
 		$this->drm_flags = 0;
-		$this->first_content_index = 0;
-		$this->last_content_index = 0;
-		$this->fcis_index = 0;
-		$this->flis_index = 0;
+		$this->first_content_index = 1;
+		$this->last_content_index = 1;
+		$this->fcis_index = -1;
+		$this->flis_index = -1;
 		$this->first_compilation_data_section_count = 0;
-		$this->number_of_compilation_data_sections = 0;
-		$this->extra_record_data_flags = 0;
-		$this->indx_offset = 0;
+		$this->number_of_compilation_data_sections = -1;
+		$this->extra_record_data_flags = 1;
+		$this->indx_offset = -1;
 	}
 
 	/**
@@ -324,6 +339,58 @@ class mobi_header extends base_header
 	}
 
 	/**
+	 * Get packed MOBI header.
+	 * @return packed MOBI header.
+	 */
+	public function write()
+	{
+		$this->data = 
+		   pack("NNNNNNNNNNNNNNNNNNNNNNNNNNNx32NNNNx12nnx4Nx4Nx4x8x4NNx4NN",
+			$this->mobi_type,
+			$this->text_encoding,
+			$this->unique_id,
+			$this->file_version,
+			$this->ortographic_index,
+			$this->inflection_index,
+			$this->index_names,
+			$this->index_keys,
+			$this->extra_index_0,
+			$this->extra_index_1,
+			$this->extra_index_2,
+			$this->extra_index_3,
+			$this->extra_index_4,
+			$this->extra_index_5,
+			$this->first_non_book_index,
+			$this->full_name_offset,
+			$this->full_name_length,
+			$this->locale,
+			$this->input_language,
+			$this->output_language,
+			$this->min_version,
+			$this->first_image_index,
+			$this->huffman_record_offset,
+			$this->huffman_record_count,
+			$this->huffman_table_offset,
+			$this->huffman_table_length,
+			$this->exth_flags,
+			$this->drm_offset,
+			$this->drm_count,
+			$this->drm_size,
+			$this->drm_flags,
+			$this->first_content_index,
+			$this->last_content_index,
+			$this->fcis_index,
+			$this->flis_index,
+			$this->first_compilation_data_section_count,
+			$this->number_of_compilation_data_sections,
+			$this->extra_record_data_flags,
+			$this->indx_offset
+		);
+
+		return parent::write();
+	}
+
+	/**
 	 * Check if header is MOBI header type.
 	 * @return non-zero if header is MOBI header type.
 	 */
@@ -396,7 +463,7 @@ class mobi_header extends base_header
 	 */
 	public function has_exth_header()
 	{
-		return $this->exth_flags & 0x40;
+		return $this->exth_flags & self::EXTH_FLAG_HEADER;
 	}
 
 	/**
