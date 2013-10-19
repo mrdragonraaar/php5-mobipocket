@@ -132,7 +132,7 @@ class mobi_header extends base_header
 		$this->extra_index_3 = -1;
 		$this->extra_index_4 = -1;
 		$this->extra_index_5 = -1;
-		$this->first_non_book_index = -1;
+		$this->first_non_book_index = 1;
 		$this->full_name_offset = 0;
 		$this->full_name_length = 0;
 		$this->locale = self::LOCALE_ENGLISH;
@@ -149,8 +149,8 @@ class mobi_header extends base_header
 		$this->drm_count = -1;
 		$this->drm_size = 0;
 		$this->drm_flags = 0;
-		$this->first_content_index = 1;
-		$this->last_content_index = 1;
+		$this->first_content_index = 0;
+		$this->last_content_index = 0;
 		$this->fcis_index = -1;
 		$this->flis_index = -1;
 		$this->first_compilation_data_section_count = 0;

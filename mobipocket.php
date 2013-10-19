@@ -43,9 +43,17 @@ class mobipocket extends palmdoc
          */
 	protected function _pdb_record_0_data()
 	{
-		$data = parent::_pdb_record_0_data();
+		$this->update_full_name_offset();
 
-		// append mobi_header and exth_header.
+		$data = parent::_pdb_record_0_data() .
+		   $this->mobi_header->write();
+
+		if ($this->mobi_header->has_exth_header() &&
+		   $this->exth_header->record_count > 0)
+			$data .= $this->exth_header->write();
+
+		if ($this->mobi_header->full_name_length > 0)
+			$data .= $this->write_full_name();
 
 		return $data;
 	}
@@ -128,29 +136,201 @@ class mobipocket extends palmdoc
 	}
 
 	/**
-	 * Map property methods from mobi_header and exth_header.
-	 * @param $method method name.
-	 * @param $arguments method arguments. Not used.
-	 * @return method return value.
+	 * Set full name in PDB record 0.
+	 * @param $full_name full name.
+	 * @return full name.
 	 */
-	public function __call($method, $arguments)
+	public function set_full_name($full_name)
 	{
-		if (method_exists($this->mobi_header, $method))
-			return $this->mobi_header->$method();
+		$this->update_full_name_offset();
+		$this->mobi_header->full_name_length = strlen($full_name);
 
-		if (method_exists($this->exth_header, $method))
-			return $this->exth_header->$method();
-
-		return;
+		return $this->full_name = $full_name;
 	}
 
 	/**
-	 * Mapping to exth_header->publishing_date_str().
+	 * Update offset for full name.
+	 * @return new full name offset.
 	 */
-	public function publishing_date_str($format = 'F d Y')
+	public function update_full_name_offset()
 	{
-		return $this->exth_header->publishing_date_str($format);
+		$offset = palmdoc_header::PALMDOC_HEADER_LEN +
+		   $this->mobi_header->header_length;
+
+		if ($this->mobi_header->has_exth_header() &&
+		   $this->exth_header->record_count > 0)
+		{
+			$offset += $this->exth_header->header_length +
+			   (4 - ($this->exth_header->header_length % 4));
+		}
+
+		return $this->mobi_header->full_name_offset = $offset;
 	}
+
+	/**
+	 * Get full name for writing to PDB record 0.
+	 * @return PDB record 0 full name.
+	 */
+	public function write_full_name()
+	{
+		$len = $this->mobi_header->full_name_length + 2;
+		$padding = 4 - ($len % 4);
+		$len = $len + $padding;
+
+		return str_pad($this->full_name, $len, "\0");
+	}
+
+	/**
+	 * EXTH header property method mappings.
+	 */
+	/* Author */
+	public function author() { return $this->exth_header->author(); }
+	public function authors() { return $this->exth_header->authors(); }
+	public function add_author($author) { return $this->exth_header->add_author($author); }
+	public function remove_author() { return $this->exth_header->remove_author(); }
+
+	/* Publisher */
+	public function publisher() { return $this->exth_header->publisher(); }
+	public function set_publisher($publisher) { return $this->exth_header->set_publisher($publisher); }
+	public function remove_publisher() { return $this->exth_header->remove_publisher(); }
+
+	/* Imprint */
+	public function imprint() { return $this->exth_header->imprint(); }
+	public function set_imprint($imprint) { return $this->exth_header->set_imprint($imprint); }
+	public function remove_imprint() { return $this->exth_header->remove_imprint(); }
+
+	/* Description */
+	public function description() { return $this->exth_header->description(); }
+	public function set_description($description)
+	{ return $this->exth_header->set_description($description); }
+	public function remove_description() { return $this->exth_header->remove_description(); }
+
+	/* ISBN */
+	public function isbn() { return $this->exth_header->isbn(); }
+	public function set_isbn($isbn) { return $this->exth_header->set_isbn($isbn); }
+	public function remove_isbn() { return $this->exth_header->remove_isbn(); }
+
+	/* Subject */
+	public function subject() { return $this->exth_header->subject(); }
+	public function subjects() { return $this->exth_header->subjects(); }
+	public function add_subject($subject) { return $this->exth_header->add_subject($subject); }
+	public function remove_subject() { return $this->exth_header->remove_subject(); }
+
+	/* Publishing Date */
+	public function publishing_date() { return $this->exth_header->publishing_date(); }
+	public function set_publishing_date($publishing_date)
+	{ return $this->exth_header->set_publishing_date($publishing_date); }
+	public function remove_publishing_date()
+	{ return $this->exth_header->remove_publishing_date(); }
+	public function publishing_date_utc() { $this->exth_header->publishing_date_utc(); }
+	public function publishing_date_str($format = 'F d Y')
+	{ return $this->exth_header->publishing_date_str($format); }
+
+	/* Review */
+	public function review() { return $this->exth_header->review(); }
+	public function set_review($review) { return $this->exth_header->set_review($review); }
+	public function remove_review() { return $this->exth_header->remove_review(); }
+
+	/* Contributor */
+	public function contributor() { return $this->exth_header->contributor(); }
+	public function set_contributor($contributor)
+	{ return $this->exth_header->set_contributor($contributor); }
+	public function remove_contributor() { return $this->exth_header->remove_contributor(); }
+
+	/* Rights */
+	public function rights() { return $this->exth_header->rights(); }
+	public function set_rights($rights) { return $this->exth_header->set_rights($rights); }
+	public function remove_rights() { return $this->exth_header->remove_rights(); }
+
+	/* ASIN */
+	public function asin() { return $this->exth_header->asin(); }
+	public function set_asin($asin) { return $this->exth_header->set_asin($asin); }
+	public function remove_asin() { return $this->exth_header->remove_asin(); }
+
+	/* Retail Price */
+	public function retail_price() { return $this->exth_header->retail_price(); }
+	public function set_retail_price($retail_price)
+	{ return $this->exth_header->set_retail_price($retail_price); }
+	public function remove_retail_price() { return $this->exth_header->remove_retail_price(); }
+
+	/* Retail Price Currency */
+	public function retail_price_currency() { return $this->exth_header->retail_price_currency(); }
+	public function set_retail_price_currency($retail_price_currency)
+	{ return $this->exth_header->set_retail_price_currency($retail_price_currency); }
+	public function remove_retail_price_currency()
+	{ return $this->exth_header->remove_retail_price_currency(); }
+
+	/* Dictionary Short Name */
+	public function dictionary_short_name()
+	{ return $this->exth_header->dictionary_short_name(); }
+	public function set_dictionary_short_name($dictionary_short_name)
+	{ return $this->exth_header->set_dictionary_short_name($dictionary_short_name); }
+	public function remove_dictionary_short_name()
+	{ return $this->exth_header->remove_dictionary_short_name(); }
+
+	/* Cover Offset */
+	public function cover_offset() { return $this->exth_header->cover_offset(); }
+	public function set_cover_offset($cover_offset)
+	{ return $this->exth_header->set_cover_offset($cover_offset); }
+	public function remove_cover_offset() { return $this->exth_header->remove_cover_offset(); }
+
+	/* Thumbnail Offset */
+	public function thumbnail_offset() { return $this->exth_header->thumbnail_offset(); }
+	public function set_thumbnail_offset($thumbnail_offset)
+	{ return $this->exth_header->set_thumbnail_offset($thumbnail_offset); }
+	public function remove_thumbnail_offset()
+	{ return $this->exth_header->remove_thumbnail_offset(); }
+
+	/* Creator Software */
+	public function creator_software() { return $this->exth_header->creator_software(); }
+	public function set_creator_software($creator_software)
+	{ return $this->exth_header->set_creator_software($creator_software); }
+	public function remove_creator_software()
+	{ return $this->exth_header->remove_creator_software(); }
+	public function creator_software_str() { return $this->exth_header->creator_software_str(); }
+
+	/* Creator Major */
+	public function creator_major() { return $this->exth_header->creator_major(); }
+	public function set_creator_major($creator_major)
+	{ return $this->exth_header->set_creator_major($creator_major); }
+	public function remove_creator_major()
+	{ return $this->exth_header->remove_creator_major(); }
+
+	/* Creator Minor */
+	public function creator_minor() { return $this->exth_header->creator_minor(); }
+	public function set_creator_minor($creator_minor)
+	{ return $this->exth_header->set_creator_minor($creator_minor); }
+	public function remove_creator_minor()
+	{ return $this->exth_header->remove_creator_minor(); }
+
+	/* Creator Build */
+	public function creator_build() { return $this->exth_header->creator_build(); }
+	public function set_creator_build($creator_build)
+	{ return $this->exth_header->set_creator_build($creator_build); }
+	public function remove_creator_build()
+	{ return $this->exth_header->remove_creator_build(); }
+
+	/* CDE Type */
+	public function cde_type() { return $this->exth_header->cde_type(); }
+	public function set_cde_type($cde_type)
+	{ return $this->exth_header->set_cde_type($cde_type); }
+	public function remove_cde_type()
+	{ return $this->exth_header->remove_cde_type(); }
+	public function cde_type_str() { return $this->exth_header->cde_type_str(); }
+
+	/* Updated Title */
+	public function updated_title() { return $this->exth_header->updated_title(); }
+	public function set_updated_title($updated_title)
+	{ return $this->exth_header->set_updated_title($updated_title); }
+	public function remove_updated_title()
+	{ return $this->exth_header->remove_updated_title(); }
+
+	/* Language */
+	public function language() { return $this->exth_header->language(); }
+	public function set_language($language)
+	{ return $this->exth_header->set_language($language); }
+	public function remove_language()
+	{ return $this->exth_header->remove_language(); }
 
 	/**
 	 * Get title.
@@ -276,6 +456,35 @@ class mobipocket extends palmdoc
 
 		return (($start_index > 0) && ($end_index >= $start_index) && 
 		   ($index >= $start_index) && ($index <= $end_index));
+	}
+
+	/**
+	 * Add a PalmDOC text record.
+	 * @param $text text of record.
+	 * @return text record.
+	 */
+	public function add_text_record($text)
+	{
+		$this->mobi_header->first_content_index = 1;
+		$this->mobi_header->last_content_index++;
+		$this->mobi_header->first_non_book_index++;
+
+		return parent::add_text_record($text);
+	}
+
+	/**
+	 * Remove all PalmDOC text records.
+	 * @return true if removed.
+	 */
+	public function remove_text_records()
+	{
+		$record_count = $this->palmdoc_header->record_count;
+
+		$this->mobi_header->first_content_index = 1;
+		$this->mobi_header->last_content_index -= $record_count;
+		$this->mobi_header->first_non_book_index = 1;
+
+		return parent::remove_text_records();
 	}
 
 	/**
