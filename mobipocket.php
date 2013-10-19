@@ -346,6 +346,20 @@ class mobipocket extends palmdoc
 	}
 
 	/**
+	 * Set title.
+	 * Sets full name and updated title.
+	 * @param $title title.
+	 * @return title.
+	 */
+	public function set_title($title)
+	{
+		$this->set_pdb_name($title);
+		$this->set_updated_title($title);
+
+		return $this->set_full_name($title);
+	}
+
+	/**
 	 * Get the cover image data.
 	 * @return cover image data.
 	 */
