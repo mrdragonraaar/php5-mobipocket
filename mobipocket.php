@@ -480,6 +480,96 @@ class mobipocket extends palmdoc
 	}
 
 	/**
+	 * Add the cover image.
+	 * @param $image_data cover image data.
+	 * @return cover image record.
+	 */
+	public function add_cover($image_data)
+	{
+		$image_record = $this->add_image_record($image_data);
+
+		$cover_offset = $this->mobi_header->last_content_index -
+		   $this->mobi_header->first_image_index;
+		$this->set_cover_offset($cover_offset);
+
+		return $image_record;
+	}
+
+	/**
+	 * Add the thumbnail image.
+	 * @param $image_data thumbnail image data.
+	 * @return thumbnail image record.
+	 */
+	public function add_thumbnail($image_data)
+	{
+		$image_record = $this->add_image_record($image_data);
+
+		$thumbnail_offset = $this->mobi_header->last_content_index -
+		   $this->mobi_header->first_image_index;
+		$this->set_thumbnail_offset($thumbnail_offset);
+
+		return $image_record;
+	}
+
+	/**
+	 * Add an image record.
+	 * @param $image_data image data.
+	 * @return image record.
+	 */
+	public function add_image_record($image_data)
+	{
+		if (strlen($image_data) == 0)
+                        return null;
+
+		$this->mobi_header->first_content_index = 1;
+
+		if ($this->mobi_header->last_content_index < 1)
+			$this->mobi_header->last_content_index = 1;
+		else
+			$this->mobi_header->last_content_index++;
+
+		if ($this->mobi_header->first_non_book_index < 0)
+			$this->mobi_header->first_non_book_index =
+			   $this->mobi_header->last_content_index;
+
+		if ($this->mobi_header->first_image_index < 0)
+			$this->mobi_header->first_image_index =
+			   $this->mobi_header->last_content_index;
+
+		$rec_index = $this->mobi_header->last_content_index;
+
+		return $this->insert_pdb_record($rec_index, $image_data);
+	}
+
+	/**
+	 * Remove all image records.
+	 * @return true if removed.
+	 */
+	public function remove_image_records()
+	{
+		$start_index = $this->mobi_header->first_image_index;
+		$end_index = $this->mobi_header->last_content_index;
+
+		$this->mobi_header->first_image_index = -1;
+
+		if ($this->palmdoc_header->record_count > 0)
+		{
+			$this->mobi_header->first_content_index = 1;
+			$this->mobi_header->last_content_index =
+			   $this->palmdoc_header->record_count;
+		}
+		else
+		{
+			$this->mobi_header->first_content_index = 0;
+			$this->mobi_header->last_content_index = 0;
+		}
+
+		$this->mobi_header->first_non_book_index = -1;
+
+		$this->remove_pdb_records($start_index, $end_index);
+	}
+
+	/**
 	 * Add a PalmDOC text record.
 	 * @param $text text of record.
 	 * @return text record.
@@ -487,8 +577,17 @@ class mobipocket extends palmdoc
 	public function add_text_record($text)
 	{
 		$this->mobi_header->first_content_index = 1;
-		$this->mobi_header->last_content_index++;
-		$this->mobi_header->first_non_book_index++;
+
+		if ($this->mobi_header->last_content_index < 1)
+			$this->mobi_header->last_content_index = 1;
+		else
+			$this->mobi_header->last_content_index++;
+
+		if ($this->mobi_header->first_non_book_index > -1)
+			$this->mobi_header->first_non_book_index++;
+
+		if ($this->mobi_header->first_image_index > -1)
+			$this->mobi_header->first_image_index++;
 
 		return parent::add_text_record($text);
 	}
@@ -501,9 +600,22 @@ class mobipocket extends palmdoc
 	{
 		$record_count = $this->palmdoc_header->record_count;
 
-		$this->mobi_header->first_content_index = 1;
-		$this->mobi_header->last_content_index -= $record_count;
-		$this->mobi_header->first_non_book_index = 1;
+		if ($this->mobi_header->first_image_index > -1)
+		{
+			$this->mobi_header->first_content_index = 1;
+			$this->mobi_header->last_content_index -= $record_count;
+		}
+		else
+		{
+			$this->mobi_header->first_content_index = 0;
+			$this->mobi_header->last_content_index = 0;
+		}
+
+		if ($this->mobi_header->first_non_book_index > -1)
+			$this->mobi_header->first_non_book_index = 1;
+
+		if ($this->mobi_header->first_image_index > -1)
+			$this->mobi_header->first_image_index = 1;
 
 		return parent::remove_text_records();
 	}

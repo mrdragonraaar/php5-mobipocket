@@ -132,7 +132,7 @@ class mobi_header extends base_header
 		$this->extra_index_3 = -1;
 		$this->extra_index_4 = -1;
 		$this->extra_index_5 = -1;
-		$this->first_non_book_index = 1;
+		$this->first_non_book_index = -1;
 		$this->full_name_offset = 0;
 		$this->full_name_length = 0;
 		$this->locale = self::LOCALE_ENGLISH;
