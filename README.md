@@ -75,6 +75,7 @@ PHP5 library for reading and writing MOBIPocket files.
     $mobipocket->remove_publisher();
     
     $mobipocket->set_publishing_date($publishing_date);
+    $mobipocket->set_publishing_date_str($publishing_date_str);
     if ($mobipocket->publishing_date())
     {
         $date_format = 'Y-m-d';
