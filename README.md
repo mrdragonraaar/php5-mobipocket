@@ -1,6 +1,6 @@
 #PHP5 MOBIPocket
 
-PHP5 library for reading MOBIPocket files.
+PHP5 library for reading and writing MOBIPocket files.
 
 ## Usage
 
@@ -37,6 +37,10 @@ PHP5 library for reading MOBIPocket files.
         
         fclose($fh);
     }
+    
+**Input**
+
+    $mobipocket->set_text($new_text);
     
 **Output**
 
