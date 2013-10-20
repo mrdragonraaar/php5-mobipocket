@@ -43,6 +43,13 @@ class mobipocket extends palmdoc
          */
 	protected function _pdb_record_0_data()
 	{
+		// remove exth header flag if no records exist.
+		if ($this->exth_header->record_count > 0)
+			$this->mobi_header->set_exth_flag_header();
+		else
+			$this->mobi_header->set_exth_flag_none();
+
+		// update offset for full name.
 		$this->update_full_name_offset();
 
 		$data = parent::_pdb_record_0_data() .
@@ -513,7 +520,7 @@ class mobipocket extends palmdoc
 			$html = self::html_anchors($html);
 
 			/* Add charset for correct dom parsing. */
-			$charset = $this->text_encoding_str();
+			$charset = $this->mobi_header->text_encoding_str();
 			$html = preg_replace('/<head>/', 
 			   '<head><meta http-equiv="Content-type" content="text/html; charset=' . $charset . '"/>', 
 			   $html);

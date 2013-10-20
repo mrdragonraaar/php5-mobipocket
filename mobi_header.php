@@ -467,6 +467,51 @@ class mobi_header extends base_header
 	}
 
 	/**
+	 * Remove all EXTH flags.
+	 * @return new EXTH flags value.
+	 */
+	public function set_exth_flag_none()
+	{
+		return $this->exth_flags = self::EXTH_FLAG_NONE;
+	}
+
+	/**
+	 * Set EXTH header flag.
+	 * @return new EXTH flags value.
+	 */
+	public function set_exth_flag_header()
+	{
+		return $this->exth_flags |= self::EXTH_FLAG_HEADER;
+	}
+
+	/**
+	 * Remove EXTH header flag.
+	 * @return new EXTH flags value.
+	 */
+	public function remove_exth_flag_header()
+	{
+		return $this->exth_flags &= ~self::EXTH_FLAG_HEADER;
+	}
+
+	/**
+	 * Set EXTH fonts flag.
+	 * @return new EXTH flags value.
+	 */
+	public function set_exth_flag_fonts()
+	{
+		return $this->exth_flags |= self::EXTH_FLAG_FONTS;
+	}
+
+	/**
+	 * Remove EXTH fonts flag.
+	 * @return new EXTH flags value.
+	 */
+	public function remove_exth_flag_fonts()
+	{
+		return $this->exth_flags &= ~self::EXTH_FLAG_FONTS;
+	}
+
+	/**
 	 * Print MOBI header.
 	 */
 	public function display()
