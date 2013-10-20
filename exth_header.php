@@ -628,6 +628,23 @@ class exth_header extends base_header
 	}
 
 	/**
+         * Set the publishing date in EXTH records from formatted string.
+	 * @param $publishing_date_str string representation of publishing date.
+	 * @return publishing data record.
+         */
+	public function set_publishing_date_str($publishing_date_str)
+	{
+		$date = date_create($publishing_date_str);
+
+		if (!$date)
+			return null;
+
+		$publish_date = date_format($date, 'c');
+
+		return $this->set_publishing_date($publish_date);
+	}
+
+	/**
 	 * Get review from EXTH records.
 	 * @return review.
 	 */

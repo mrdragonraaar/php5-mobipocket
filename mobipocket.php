@@ -232,6 +232,8 @@ class mobipocket extends palmdoc
 	public function publishing_date_utc() { $this->exth_header->publishing_date_utc(); }
 	public function publishing_date_str($format = 'F d Y')
 	{ return $this->exth_header->publishing_date_str($format); }
+	public function set_publishing_date_str($publishing_date_str)
+	{ return $this->exth_header->set_publishing_date_str($publishing_date_str); }
 
 	/* Review */
 	public function review() { return $this->exth_header->review(); }
