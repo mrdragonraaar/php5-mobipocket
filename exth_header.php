@@ -886,6 +886,51 @@ class exth_header extends base_header
 	}
 
 	/**
+	 * Set creator software to mobigen in EXTH records.
+	 * @return creator software record.
+	 */
+	public function set_creator_software_mobigen()
+	{
+		return $this->set_creator_software(self::CREATORSOFTWARE_MOBIGEN);
+	}
+
+	/**
+	 * Set creator software to MobiPocket Creator in EXTH records.
+	 * @return creator software record.
+	 */
+	public function set_creator_software_mobipocket_creator()
+	{
+		return $this->set_creator_software(self::CREATORSOFTWARE_MOBIPOCKETCREATOR);
+	}
+
+	/**
+	 * Set creator software to kindlegen (Windows) in EXTH records.
+	 * @return creator software record.
+	 */
+	public function set_creator_software_kindlegen_windows()
+	{
+		return $this->set_creator_software(self::CREATORSOFTWARE_KINDLEGEN_WINDOWS);
+	}
+
+	/**
+	 * Set creator software to kindlegen (Linux) in EXTH records.
+	 * @return creator software record.
+	 */
+	public function set_creator_software_kindlegen_linux()
+	{
+		return $this->set_creator_software(self::CREATORSOFTWARE_KINDLEGEN_LINUX);
+	}
+
+	/**
+	 * Set creator software to kindlegen (Mac) in EXTH records.
+	 * @return creator software record.
+	 */
+	public function set_creator_software_kindlegen_mac()
+	{
+		return $this->set_creator_software(self::CREATORSOFTWARE_KINDLEGEN_MAC);
+	}
+
+	/**
 	 * Set creator software in EXTH records.
 	 * @param $creator_software creator software.
 	 * @return creator software record.

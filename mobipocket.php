@@ -292,6 +292,16 @@ class mobipocket extends palmdoc
 	public function creator_software() { return $this->exth_header->creator_software(); }
 	public function set_creator_software($creator_software)
 	{ return $this->exth_header->set_creator_software($creator_software); }
+	public function set_creator_software_mobigen()
+	{ return $this->exth_header->set_creator_software_mobigen(); }
+	public function set_creator_software_mobipocket_creator()
+	{ return $this->exth_header->set_creator_software_mobipocket_creator(); }
+	public function set_creator_software_kindlegen_windows()
+	{ return $this->exth_header->set_creator_software_kindlegen_windows(); }
+	public function set_creator_software_kindlegen_linux()
+	{ return $this->exth_header->set_creator_software_kindlegen_linux(); }
+	public function set_creator_software_kindlegen_mac()
+	{ return $this->exth_header->set_creator_software_kindlegen_mac(); }
 	public function remove_creator_software()
 	{ return $this->exth_header->remove_creator_software(); }
 	public function creator_software_str() { return $this->exth_header->creator_software_str(); }
