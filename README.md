@@ -12,12 +12,29 @@ PHP5 library for reading MOBIPocket files.
 
     $mobipocket = new mobipocket();
     
+**Load MOBIPocket**
+
+    $mobipocket->load($filename);
+    
 **Read MOBIPocket**
 
-    if ($fh = fopen($this->filename, "r"))
+    if ($fh = fopen($filename, "r"))
     {
         $mobipocket->read($fh);
 
+        fclose($fh);
+    }
+
+**Save MOBIPocket**
+
+    $mobipocket->save($new_filename);
+    
+**Write Mobipocket**
+
+    if ($fh = fopen($new_filename, "w"))
+    {
+        $mobipocket->write($fh);
+        
         fclose($fh);
     }
     
