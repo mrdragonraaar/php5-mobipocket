@@ -112,6 +112,8 @@ PHP5 library for reading and writing MOBIPocket files.
         echo $mobipocket->creator_major();
         echo $mobipocket->creator_minor();
         echo $mobipocket->creator_build();
+        echo $mobipocket->creator_version();
+        echo $mobipocket->creator_software_full_str();
     }
     $mobipocket->remove_creator_software();
     $mobipocket->remove_creator_major();
