@@ -329,6 +329,13 @@ class mobipocket extends palmdoc
 	public function remove_creator_build()
 	{ return $this->exth_header->remove_creator_build(); }
 
+	/* Creator Version */
+	public function creator_version() { return $this->exth_header->creator_version(); }
+
+	/* Creator Software / Version */
+	public function creator_software_full_str()
+	{ return $this->exth_header->creator_software_full_str(); }
+
 	/* CDE Type */
 	public function cde_type() { return $this->exth_header->cde_type(); }
 	public function set_cde_type($cde_type)

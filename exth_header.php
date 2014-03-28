@@ -1080,6 +1080,42 @@ class exth_header extends base_header
 	}
 
 	/**
+	 * Get creator version from EXTH records.
+	 * @return creator version.
+	 */
+	public function creator_version()
+	{
+		$creator_major = $this->creator_major();
+		$creator_minor = $this->creator_minor();
+		$creator_build = $this->creator_build();
+
+		if ($creator_major || $creator_minor || $creator_build)
+			return $creator_major . '.' . $creator_minor . '.' . $creator_build;
+
+		return '';
+	}
+
+	/**
+	 * Get full creator software and version from EXTH records as string.
+	 * @return full creator software string.
+	 */
+	public function creator_software_full_str()
+	{
+		$creator_software_str = $this->creator_software_str();
+		$creator_version = $this->creator_version();
+
+		if ($creator_software_str)
+		{
+			if ($creator_version)
+				return $creator_software_str . ' ' . $creator_version;
+
+			return $creator_software_str;
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get cde type from EXTH records.
 	 * @return cde type.
 	 */
