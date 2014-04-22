@@ -386,6 +386,33 @@ class mobipocket extends palmdoc
 	}
 
 	/**
+	 * Get title used for sorting from given title.
+	 * @param $title title.
+	 * @return title sort.
+	 */
+	public static function title_to_title_sort($title)
+	{
+		$prefixes = ['A', 'An', 'The'];
+		$prefix_pat = '/^(' . join('|', $prefixes) . ')\s+/i';
+
+		if (preg_match($prefix_pat, $title, $matches))
+		{
+			$title = trim(substr($title, strlen($matches[0])) . ', ' . $matches[0]);
+		}
+
+		return $title;
+	}
+
+	/**
+	 * Get title used for sorting.
+	 * @return title sort.
+	 */
+	public function title_sort()
+	{
+		return self::title_to_title_sort($this->title());
+	}
+
+	/**
 	 * Get the cover image data.
 	 * @return cover image data.
 	 */
