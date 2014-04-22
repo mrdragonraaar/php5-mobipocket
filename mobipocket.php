@@ -196,6 +196,59 @@ class mobipocket extends palmdoc
 	public function add_author($author) { return $this->exth_header->add_author($author); }
 	public function remove_author() { return $this->exth_header->remove_author(); }
 
+	/**
+	 * Get authors used for sorting.
+	 * @return authors sort.
+	 */
+	public function authors_sort()
+	{
+		return array_map('self::author_to_author_sort', $this->authors());
+	}
+
+	/**
+	 * Get author used for sorting from given author.
+	 * @param $author.
+	 * @return author sort.
+	 */
+	public static function author_to_author_sort($author)
+	{
+		$prefixes = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof', 'Sir'];
+		$suffixes = ['Jr', 'Sr', 'Inc', 'Ph.D', 'Phd', 'MD', 'M.D', 'I', 'II', 'III', 'IV', 'Junior', 'Senior'];
+
+		$prefixes = array_merge($prefixes, array_map(function($p) { return $p . '.'; }, $prefixes));
+		$suffixes = array_merge($suffixes, array_map(function($s) { return $s . '.'; }, $suffixes));
+
+		$author_split = explode(' ', trim($author));
+
+		if (count($author_split) < 2)
+			return $author;
+
+		while ($author_split && 
+		   in_array(strtolower($author_split[0]), array_map('strtolower', $prefixes)))
+		{
+			array_shift($author_split);
+		}
+
+		$suffix = '';
+		while ($author_split &&
+		   in_array(strtolower($author_split[count($author_split) - 1]), array_map('strtolower', $suffixes)))
+		{
+			$suffix .= array_pop($author_split) . ' ';
+		}
+		trim($suffix);
+
+		if (!$author_split || strpos(implode($author_split, ' '), ',') !== false)
+			return $author;
+
+		$author_sort = array_pop($author_split);
+		if ($author_split)
+			$author_sort .= ', ' . implode($author_split, ' ');
+		if ($suffix)
+			$author_sort .= ' ' . $suffix;
+		
+		return $author_sort;
+	}
+
 	/* Publisher */
 	public function publisher() { return $this->exth_header->publisher(); }
 	public function set_publisher($publisher) { return $this->exth_header->set_publisher($publisher); }
@@ -386,6 +439,15 @@ class mobipocket extends palmdoc
 	}
 
 	/**
+	 * Get title used for sorting.
+	 * @return title sort.
+	 */
+	public function title_sort()
+	{
+		return self::title_to_title_sort($this->title());
+	}
+
+	/**
 	 * Get title used for sorting from given title.
 	 * @param $title title.
 	 * @return title sort.
@@ -401,15 +463,6 @@ class mobipocket extends palmdoc
 		}
 
 		return $title;
-	}
-
-	/**
-	 * Get title used for sorting.
-	 * @return title sort.
-	 */
-	public function title_sort()
-	{
-		return self::title_to_title_sort($this->title());
 	}
 
 	/**
